@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import AutosizeInput from 'react-input-autosize';
 import classNames from 'classnames';
+import { Manager, Popper, Target } from 'react-popper';
 
 function arrowRenderer(_ref) {
 	var onMouseDown = _ref.onMouseDown;
@@ -748,6 +749,7 @@ function clone(obj) {
     if (obj.hasOwnProperty(attr)) {
       copy[attr] = obj[attr];
     }
+    
   }
   return copy;
 }
@@ -870,12 +872,6 @@ var Select$1 = function (_React$Component) {
           menuDOM.scrollTop = focusedDOM.offsetTop;
         }
       }
-      if (this.props.scrollMenuIntoView && this.menuContainer) {
-        var menuContainerRect = this.menuContainer.getBoundingClientRect();
-        if (window.innerHeight < menuContainerRect.bottom + this.props.menuBuffer) {
-          window.scrollBy(0, menuContainerRect.bottom + this.props.menuBuffer - window.innerHeight);
-        }
-      }
       if (prevProps.disabled !== this.props.disabled) {
         this.setState({ isFocused: false }); // eslint-disable-line react/no-did-update-set-state
         this.closeMenu();
@@ -910,8 +906,9 @@ var Select$1 = function (_React$Component) {
   }, {
     key: 'handleTouchOutside',
     value: function handleTouchOutside(event) {
+      debugger;
       // handle touch outside on ios to dismiss menu
-      if (this.wrapper && !this.wrapper.contains(event.target) && this.menuContainer && !this.menuContainer.contains(event.target)) {
+      if (this.wrapper && !ReactDOM.findDOMNode(this.wrapper).contains(event.target) && this.menuContainer && !this.menuContainer.contains(event.target)) {
         this.closeMenu();
       }
     }
@@ -1238,9 +1235,9 @@ var Select$1 = function (_React$Component) {
 
     /**
      * Turns a value into an array from the given options
-     * @param	{String|Number|Array}	value		- the value of the select input
-     * @param	{Object}		nextProps	- optionally specify the nextProps so the returned array uses the latest configuration
-     * @returns	{Array}	the value of the select represented in an array
+     * @param    {String|Number|Array}    value        - the value of the select input
+     * @param    {Object}        nextProps    - optionally specify the nextProps so the returned array uses the latest configuration
+     * @returns    {Array}    the value of the select represented in an array
      */
 
   }, {
@@ -1268,8 +1265,8 @@ var Select$1 = function (_React$Component) {
 
     /**
      * Retrieve a value from the given options and valueKey
-     * @param	{String|Number|Array}	value	- the selected value(s)
-     * @param	{Object}		props	- the Select component's props (or nextProps)
+     * @param    {String|Number|Array}    value    - the selected value(s)
+     * @param    {Object}        props    - the Select component's props (or nextProps)
      */
 
   }, {
@@ -1664,7 +1661,8 @@ var Select$1 = function (_React$Component) {
 
       return React.createElement(
         'span',
-        { className: 'Select-clear-zone', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText,
+        { className: 'Select-clear-zone',
+          title: this.props.multi ? this.props.clearAllText : this.props.clearValueText,
           'aria-label': this.props.multi ? this.props.clearAllText : this.props.clearValueText,
           onMouseDown: this.clearValue,
           onTouchStart: this.handleTouchStart,
@@ -1878,18 +1876,20 @@ var Select$1 = function (_React$Component) {
       }
 
       return React.createElement(
-        Dropdown$$1,
-        null,
+        Popper,
+        { placement: 'bottom', innerRef: function innerRef(ref) {
+            return _this8.menuContainer = ref;
+          }, className: 'Select-menu-outer',
+          style: this.props.menuContainerStyle },
         React.createElement(
-          'div',
-          { ref: function ref(_ref6) {
-              return _this8.menuContainer = _ref6;
-            }, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
+          Dropdown$$1,
+          null,
           React.createElement(
             'div',
             { ref: function ref(_ref5) {
                 return _this8.menu = _ref5;
-              }, role: 'listbox', tabIndex: -1, className: 'Select-menu', id: this._instancePrefix + '-list',
+              }, role: 'listbox', tabIndex: -1, className: 'Select-menu',
+              id: this._instancePrefix + '-list',
               style: this.props.menuStyle,
               onScroll: this.handleMenuScroll,
               onMouseDown: this.handleMouseDownOnMenu },
@@ -1933,23 +1933,27 @@ var Select$1 = function (_React$Component) {
       if (this.props.multi && !this.props.disabled && valueArray.length && !this.state.inputValue && this.state.isFocused && this.props.backspaceRemoves) {
         removeMessage = React.createElement(
           'span',
-          { id: this._instancePrefix + '-backspace-remove-message', className: 'Select-aria-only', 'aria-live': 'assertive' },
+          { id: this._instancePrefix + '-backspace-remove-message', className: 'Select-aria-only',
+            'aria-live': 'assertive' },
           this.props.backspaceToRemoveMessage.replace('{label}', valueArray[valueArray.length - 1][this.props.labelKey])
         );
       }
 
       return React.createElement(
-        'div',
-        { ref: function ref(_ref8) {
-            return _this9.wrapper = _ref8;
+        Manager,
+        {
+          component: 'div',
+          ref: function ref(_ref6) {
+            return _this9.wrapper = _ref6;
           },
           className: className,
           style: this.props.wrapperStyle },
         this.renderHiddenField(valueArray),
         React.createElement(
-          'div',
-          { ref: function ref(_ref7) {
-              return _this9.control = _ref7;
+          Target,
+          {
+            innerRef: function innerRef(ref) {
+              return _this9.control = ref;
             },
             className: 'Select-control',
             style: this.props.style,
@@ -1957,8 +1961,7 @@ var Select$1 = function (_React$Component) {
             onMouseDown: this.handleMouseDown,
             onTouchEnd: this.handleTouchEnd,
             onTouchStart: this.handleTouchStart,
-            onTouchMove: this.handleTouchMove
-          },
+            onTouchMove: this.handleTouchMove },
           React.createElement(
             'span',
             { className: 'Select-multi-value-wrapper', id: this._instancePrefix + '-value' },

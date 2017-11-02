@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react'), require('prop-types'), require('react-dom'), require('react-input-autosize'), require('classnames')) :
-	typeof define === 'function' && define.amd ? define(['react', 'prop-types', 'react-dom', 'react-input-autosize', 'classnames'], factory) :
-	(global.Select = factory(global.React,global.PropTypes,global.ReactDOM,global.AutosizeInput,global.classNames));
-}(this, (function (React,PropTypes,ReactDOM,AutosizeInput,classNames) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react'), require('prop-types'), require('react-dom'), require('react-input-autosize'), require('classnames'), require('react-popper')) :
+	typeof define === 'function' && define.amd ? define(['react', 'prop-types', 'react-dom', 'react-input-autosize', 'classnames', 'react-popper'], factory) :
+	(global.Select = factory(global.React,global.PropTypes,global.ReactDOM,global.AutosizeInput,global.classNames,global.Popper));
+}(this, (function (React,PropTypes,ReactDOM,AutosizeInput,classNames,reactPopper) { 'use strict';
 
 var React__default = 'default' in React ? React['default'] : React;
 PropTypes = PropTypes && PropTypes.hasOwnProperty('default') ? PropTypes['default'] : PropTypes;
@@ -754,6 +754,7 @@ function clone(obj) {
     if (obj.hasOwnProperty(attr)) {
       copy[attr] = obj[attr];
     }
+    
   }
   return copy;
 }
@@ -876,12 +877,6 @@ var Select$1 = function (_React$Component) {
           menuDOM.scrollTop = focusedDOM.offsetTop;
         }
       }
-      if (this.props.scrollMenuIntoView && this.menuContainer) {
-        var menuContainerRect = this.menuContainer.getBoundingClientRect();
-        if (window.innerHeight < menuContainerRect.bottom + this.props.menuBuffer) {
-          window.scrollBy(0, menuContainerRect.bottom + this.props.menuBuffer - window.innerHeight);
-        }
-      }
       if (prevProps.disabled !== this.props.disabled) {
         this.setState({ isFocused: false }); // eslint-disable-line react/no-did-update-set-state
         this.closeMenu();
@@ -916,8 +911,9 @@ var Select$1 = function (_React$Component) {
   }, {
     key: 'handleTouchOutside',
     value: function handleTouchOutside(event) {
+      debugger;
       // handle touch outside on ios to dismiss menu
-      if (this.wrapper && !this.wrapper.contains(event.target) && this.menuContainer && !this.menuContainer.contains(event.target)) {
+      if (this.wrapper && !ReactDOM.findDOMNode(this.wrapper).contains(event.target) && this.menuContainer && !this.menuContainer.contains(event.target)) {
         this.closeMenu();
       }
     }
@@ -1244,9 +1240,9 @@ var Select$1 = function (_React$Component) {
 
     /**
      * Turns a value into an array from the given options
-     * @param	{String|Number|Array}	value		- the value of the select input
-     * @param	{Object}		nextProps	- optionally specify the nextProps so the returned array uses the latest configuration
-     * @returns	{Array}	the value of the select represented in an array
+     * @param    {String|Number|Array}    value        - the value of the select input
+     * @param    {Object}        nextProps    - optionally specify the nextProps so the returned array uses the latest configuration
+     * @returns    {Array}    the value of the select represented in an array
      */
 
   }, {
@@ -1274,8 +1270,8 @@ var Select$1 = function (_React$Component) {
 
     /**
      * Retrieve a value from the given options and valueKey
-     * @param	{String|Number|Array}	value	- the selected value(s)
-     * @param	{Object}		props	- the Select component's props (or nextProps)
+     * @param    {String|Number|Array}    value    - the selected value(s)
+     * @param    {Object}        props    - the Select component's props (or nextProps)
      */
 
   }, {
@@ -1670,7 +1666,8 @@ var Select$1 = function (_React$Component) {
 
       return React__default.createElement(
         'span',
-        { className: 'Select-clear-zone', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText,
+        { className: 'Select-clear-zone',
+          title: this.props.multi ? this.props.clearAllText : this.props.clearValueText,
           'aria-label': this.props.multi ? this.props.clearAllText : this.props.clearValueText,
           onMouseDown: this.clearValue,
           onTouchStart: this.handleTouchStart,
@@ -1884,18 +1881,20 @@ var Select$1 = function (_React$Component) {
       }
 
       return React__default.createElement(
-        Dropdown$$1,
-        null,
+        reactPopper.Popper,
+        { placement: 'bottom', innerRef: function innerRef(ref) {
+            return _this8.menuContainer = ref;
+          }, className: 'Select-menu-outer',
+          style: this.props.menuContainerStyle },
         React__default.createElement(
-          'div',
-          { ref: function ref(_ref6) {
-              return _this8.menuContainer = _ref6;
-            }, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
+          Dropdown$$1,
+          null,
           React__default.createElement(
             'div',
             { ref: function ref(_ref5) {
                 return _this8.menu = _ref5;
-              }, role: 'listbox', tabIndex: -1, className: 'Select-menu', id: this._instancePrefix + '-list',
+              }, role: 'listbox', tabIndex: -1, className: 'Select-menu',
+              id: this._instancePrefix + '-list',
               style: this.props.menuStyle,
               onScroll: this.handleMenuScroll,
               onMouseDown: this.handleMouseDownOnMenu },
@@ -1939,23 +1938,27 @@ var Select$1 = function (_React$Component) {
       if (this.props.multi && !this.props.disabled && valueArray.length && !this.state.inputValue && this.state.isFocused && this.props.backspaceRemoves) {
         removeMessage = React__default.createElement(
           'span',
-          { id: this._instancePrefix + '-backspace-remove-message', className: 'Select-aria-only', 'aria-live': 'assertive' },
+          { id: this._instancePrefix + '-backspace-remove-message', className: 'Select-aria-only',
+            'aria-live': 'assertive' },
           this.props.backspaceToRemoveMessage.replace('{label}', valueArray[valueArray.length - 1][this.props.labelKey])
         );
       }
 
       return React__default.createElement(
-        'div',
-        { ref: function ref(_ref8) {
-            return _this9.wrapper = _ref8;
+        reactPopper.Manager,
+        {
+          component: 'div',
+          ref: function ref(_ref6) {
+            return _this9.wrapper = _ref6;
           },
           className: className,
           style: this.props.wrapperStyle },
         this.renderHiddenField(valueArray),
         React__default.createElement(
-          'div',
-          { ref: function ref(_ref7) {
-              return _this9.control = _ref7;
+          reactPopper.Target,
+          {
+            innerRef: function innerRef(ref) {
+              return _this9.control = ref;
             },
             className: 'Select-control',
             style: this.props.style,
@@ -1963,8 +1966,7 @@ var Select$1 = function (_React$Component) {
             onMouseDown: this.handleMouseDown,
             onTouchEnd: this.handleTouchEnd,
             onTouchStart: this.handleTouchStart,
-            onTouchMove: this.handleTouchMove
-          },
+            onTouchMove: this.handleTouchMove },
           React__default.createElement(
             'span',
             { className: 'Select-multi-value-wrapper', id: this._instancePrefix + '-value' },
