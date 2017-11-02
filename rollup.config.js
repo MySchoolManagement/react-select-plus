@@ -11,6 +11,7 @@ const globals = {
 	'react-dom': 'ReactDOM',
 	'react-input-autosize': 'AutosizeInput',
 	react: 'React',
+	'react-popper': 'Popper'
 };
 const external = Object.keys(globals);
 const babelOptions = {
