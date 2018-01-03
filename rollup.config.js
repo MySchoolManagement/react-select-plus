@@ -4,20 +4,27 @@ import uglify from 'rollup-plugin-uglify';
 import { minify } from 'uglify-es';
 
 const name = 'Select';
-const path = 'dist/react-select';
+const path = 'dist/react-select-plus';
 const globals = {
 	classnames: 'classNames',
 	'prop-types': 'PropTypes',
 	'react-dom': 'ReactDOM',
 	'react-input-autosize': 'AutosizeInput',
 	react: 'React',
+	'merge': 'lodash.merge',
 	'react-popper': 'Popper'
 };
 const external = Object.keys(globals);
-const babelOptions = {
-	babelrc: false,
-	presets: [['es2015', { modules: false }], 'stage-0', 'react'],
-	plugins: ['external-helpers'],
+const babelOptions = (production) => {
+	let result = {
+		babelrc: false,
+		presets: [['es2015', { modules: false }], 'stage-0', 'react'],
+		plugins: ['external-helpers'],
+	};
+	if (production) {
+		result.plugins.push('transform-react-remove-prop-types');
+	};
+	return result;
 };
 
 export default [
@@ -28,7 +35,7 @@ export default [
 			format: 'es',
 		},
 		external: external,
-		plugins: [babel(babelOptions)],
+		plugins: [babel(babelOptions(false))],
 	},
 	{
 		input: 'src/index.umd.js',
@@ -39,7 +46,7 @@ export default [
 		},
 		globals: globals,
 		external: external,
-		plugins: [babel(babelOptions), resolve()],
+		plugins: [babel(babelOptions(false)), resolve()],
 	},
 	{
 		input: 'src/index.umd.js',
@@ -50,6 +57,6 @@ export default [
 		},
 		globals: globals,
 		external: external,
-		plugins: [babel(babelOptions), resolve(), uglify({}, minify)],
+		plugins: [babel(babelOptions(true)), resolve(), uglify({}, minify)],
 	},
 ];
