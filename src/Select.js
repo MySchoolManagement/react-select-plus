@@ -8,7 +8,8 @@ import PropTypes from 'prop-types';
 import { findDOMNode } from 'react-dom';
 import AutosizeInput from 'react-input-autosize';
 import classNames from 'classnames';
-import {Manager, Popper, Target} from 'react-popper';
+import { Manager, Popper, Target } from 'react-popper';
+import merge from 'lodash.merge';
 
 import defaultArrowRenderer from './utils/defaultArrowRenderer';
 import defaultFilterOptions from './utils/defaultFilterOptions';
@@ -205,7 +206,7 @@ class Select extends React.Component {
 
 	handleTouchOutside (event) {
 		// handle touch outside on ios to dismiss menu
-		if (this.wrapper && !this.wrapper.contains(event.target)) {
+		if (this.wrapper && !findDOMNode(this.wrapper).contains(event.target)) {
 			this.closeMenu();
 		}
 	}
@@ -1126,8 +1127,49 @@ class Select extends React.Component {
 		}
 
 		return (
-			<Popper placement="bottom" innerRef={ref => this.menuContainer = ref} className="Select-menu-outer"
-							style={this.props.menuContainerStyle}>
+			<Popper placement="bottom"
+							innerRef={ref => this.menuContainer = ref}
+							className="Select-menu-outer"
+							style={this.props.menuContainerStyle}
+
+							modifiers={{
+								preventOverflow: {
+									boundariesElement: 'viewport'
+								},
+								syncWidthWithReference: {
+									order: 0,
+									enabled: true,
+									fn: (data, options) => {
+										return merge(
+											{},
+											data,
+											{
+												offsets: {
+													popper: {
+														width: data.offsets.reference.width
+													}
+
+												}
+											}
+										);
+									}
+								},
+								addWidthStyle: {
+									order: 899,
+									enabled: true,
+									fn: (data, options) => {
+										return merge(
+											{},
+											data,
+											{
+												styles: {
+													width: `${data.offsets.popper.width}px`
+												}
+											}
+										);
+									}
+								}
+							}}>
 				<Dropdown>
 					<div ref={ref => this.menu = ref} role="listbox" tabIndex={-1} className="Select-menu"
 							 id={this._instancePrefix + '-list'}

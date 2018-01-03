@@ -6,7 +6,6 @@
 @import 'mixins';
 
 .Select {
-	position: relative;
 
 	// disable some browser-specific behaviours that break the input
 	input::-webkit-contacts-auto-fill-button,
