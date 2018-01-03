@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { findDOMNode } from 'react-dom';
 import AutosizeInput from 'react-input-autosize';
 import classNames from 'classnames';
+import { Manager, Popper, Target } from 'react-popper';
+import merge from 'lodash.merge';
 
 function arrowRenderer(_ref) {
 	var onMouseDown = _ref.onMouseDown;
@@ -932,7 +934,7 @@ var Select$1 = function (_React$Component) {
 		key: 'handleTouchOutside',
 		value: function handleTouchOutside(event) {
 			// handle touch outside on ios to dismiss menu
-			if (this.wrapper && !this.wrapper.contains(event.target)) {
+			if (this.wrapper && !findDOMNode(this.wrapper).contains(event.target)) {
 				this.closeMenu();
 			}
 		}
@@ -1949,18 +1951,53 @@ var Select$1 = function (_React$Component) {
 			}
 
 			return React.createElement(
-				Dropdown$$1,
-				null,
+				Popper,
+				{ placement: 'bottom',
+					innerRef: function innerRef(ref) {
+						return _this9.menuContainer = ref;
+					},
+					className: 'Select-menu-outer',
+					style: this.props.menuContainerStyle,
+
+					modifiers: {
+						preventOverflow: {
+							boundariesElement: 'viewport'
+						},
+						syncWidthWithReference: {
+							order: 0,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									offsets: {
+										popper: {
+											width: data.offsets.reference.width
+										}
+
+									}
+								});
+							}
+						},
+						addWidthStyle: {
+							order: 899,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									styles: {
+										width: data.offsets.popper.width + 'px'
+									}
+								});
+							}
+						}
+					} },
 				React.createElement(
-					'div',
-					{ ref: function ref(_ref6) {
-							return _this9.menuContainer = _ref6;
-						}, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
+					Dropdown$$1,
+					null,
 					React.createElement(
 						'div',
 						{ ref: function ref(_ref5) {
 								return _this9.menu = _ref5;
-							}, role: 'listbox', tabIndex: -1, className: 'Select-menu', id: this._instancePrefix + '-list',
+							}, role: 'listbox', tabIndex: -1, className: 'Select-menu',
+							id: this._instancePrefix + '-list',
 							style: this.props.menuStyle,
 							onScroll: this.handleMenuScroll,
 							onMouseDown: this.handleMouseDownOnMenu },
@@ -2011,17 +2048,20 @@ var Select$1 = function (_React$Component) {
 			}
 
 			return React.createElement(
-				'div',
-				{ ref: function ref(_ref8) {
-						return _this10.wrapper = _ref8;
+				Manager,
+				{
+					component: 'div',
+					ref: function ref(_ref6) {
+						return _this10.wrapper = _ref6;
 					},
 					className: className,
 					style: this.props.wrapperStyle },
 				this.renderHiddenField(valueArray),
 				React.createElement(
-					'div',
-					{ ref: function ref(_ref7) {
-							return _this10.control = _ref7;
+					Target,
+					{
+						innerRef: function innerRef(ref) {
+							return _this10.control = ref;
 						},
 						className: 'Select-control',
 						style: this.props.style,
@@ -2029,8 +2069,7 @@ var Select$1 = function (_React$Component) {
 						onMouseDown: this.handleMouseDown,
 						onTouchEnd: this.handleTouchEnd,
 						onTouchStart: this.handleTouchStart,
-						onTouchMove: this.handleTouchMove
-					},
+						onTouchMove: this.handleTouchMove },
 					React.createElement(
 						'span',
 						{ className: 'Select-multi-value-wrapper', id: this._instancePrefix + '-value' },

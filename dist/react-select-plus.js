@@ -1,13 +1,14 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react'), require('prop-types'), require('react-dom'), require('react-input-autosize'), require('classnames')) :
-	typeof define === 'function' && define.amd ? define(['react', 'prop-types', 'react-dom', 'react-input-autosize', 'classnames'], factory) :
-	(global.Select = factory(global.React,global.PropTypes,global.ReactDOM,global.AutosizeInput,global.classNames));
-}(this, (function (React,PropTypes,reactDom,AutosizeInput,classNames) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react'), require('prop-types'), require('react-dom'), require('react-input-autosize'), require('classnames'), require('react-popper'), require('lodash.merge')) :
+	typeof define === 'function' && define.amd ? define(['react', 'prop-types', 'react-dom', 'react-input-autosize', 'classnames', 'react-popper', 'lodash.merge'], factory) :
+	(global.Select = factory(global.React,global.PropTypes,global.ReactDOM,global.AutosizeInput,global.classNames,global.Popper,global.merge));
+}(this, (function (React,PropTypes,reactDom,AutosizeInput,classNames,reactPopper,merge) { 'use strict';
 
 var React__default = 'default' in React ? React['default'] : React;
 PropTypes = PropTypes && PropTypes.hasOwnProperty('default') ? PropTypes['default'] : PropTypes;
 AutosizeInput = AutosizeInput && AutosizeInput.hasOwnProperty('default') ? AutosizeInput['default'] : AutosizeInput;
 classNames = classNames && classNames.hasOwnProperty('default') ? classNames['default'] : classNames;
+merge = merge && merge.hasOwnProperty('default') ? merge['default'] : merge;
 
 function arrowRenderer(_ref) {
 	var onMouseDown = _ref.onMouseDown;
@@ -937,7 +938,7 @@ var Select$1 = function (_React$Component) {
 		key: 'handleTouchOutside',
 		value: function handleTouchOutside(event) {
 			// handle touch outside on ios to dismiss menu
-			if (this.wrapper && !this.wrapper.contains(event.target)) {
+			if (this.wrapper && !reactDom.findDOMNode(this.wrapper).contains(event.target)) {
 				this.closeMenu();
 			}
 		}
@@ -1954,18 +1955,53 @@ var Select$1 = function (_React$Component) {
 			}
 
 			return React__default.createElement(
-				Dropdown$$1,
-				null,
+				reactPopper.Popper,
+				{ placement: 'bottom',
+					innerRef: function innerRef(ref) {
+						return _this9.menuContainer = ref;
+					},
+					className: 'Select-menu-outer',
+					style: this.props.menuContainerStyle,
+
+					modifiers: {
+						preventOverflow: {
+							boundariesElement: 'viewport'
+						},
+						syncWidthWithReference: {
+							order: 0,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									offsets: {
+										popper: {
+											width: data.offsets.reference.width
+										}
+
+									}
+								});
+							}
+						},
+						addWidthStyle: {
+							order: 899,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									styles: {
+										width: data.offsets.popper.width + 'px'
+									}
+								});
+							}
+						}
+					} },
 				React__default.createElement(
-					'div',
-					{ ref: function ref(_ref6) {
-							return _this9.menuContainer = _ref6;
-						}, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
+					Dropdown$$1,
+					null,
 					React__default.createElement(
 						'div',
 						{ ref: function ref(_ref5) {
 								return _this9.menu = _ref5;
-							}, role: 'listbox', tabIndex: -1, className: 'Select-menu', id: this._instancePrefix + '-list',
+							}, role: 'listbox', tabIndex: -1, className: 'Select-menu',
+							id: this._instancePrefix + '-list',
 							style: this.props.menuStyle,
 							onScroll: this.handleMenuScroll,
 							onMouseDown: this.handleMouseDownOnMenu },
@@ -2016,17 +2052,20 @@ var Select$1 = function (_React$Component) {
 			}
 
 			return React__default.createElement(
-				'div',
-				{ ref: function ref(_ref8) {
-						return _this10.wrapper = _ref8;
+				reactPopper.Manager,
+				{
+					component: 'div',
+					ref: function ref(_ref6) {
+						return _this10.wrapper = _ref6;
 					},
 					className: className,
 					style: this.props.wrapperStyle },
 				this.renderHiddenField(valueArray),
 				React__default.createElement(
-					'div',
-					{ ref: function ref(_ref7) {
-							return _this10.control = _ref7;
+					reactPopper.Target,
+					{
+						innerRef: function innerRef(ref) {
+							return _this10.control = ref;
 						},
 						className: 'Select-control',
 						style: this.props.style,
@@ -2034,8 +2073,7 @@ var Select$1 = function (_React$Component) {
 						onMouseDown: this.handleMouseDown,
 						onTouchEnd: this.handleTouchEnd,
 						onTouchStart: this.handleTouchStart,
-						onTouchMove: this.handleTouchMove
-					},
+						onTouchMove: this.handleTouchMove },
 					React__default.createElement(
 						'span',
 						{ className: 'Select-multi-value-wrapper', id: this._instancePrefix + '-value' },
