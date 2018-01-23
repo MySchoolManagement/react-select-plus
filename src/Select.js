@@ -660,6 +660,7 @@ class Select extends React.Component {
 			return;
 		}
 		event.preventDefault();
+		event.stopPropagation();
 		this.setValue(this.getResetValue());
 		this.setState({
 			isOpen: false,
