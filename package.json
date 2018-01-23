@@ -1,6 +1,6 @@
 {
   "name": "react-select-plus",
-  "version": "1.1.0-msm.1",
+  "version": "1.1.0-msm.2",
   "description": "A fork of react-select with support for option groups",
   "main": "lib/index.js",
   "jsnext:main": "dist/react-select-plus.es.js",

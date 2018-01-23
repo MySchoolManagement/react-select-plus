@@ -1456,6 +1456,7 @@ var Select$1 = function (_React$Component) {
 				return;
 			}
 			event.preventDefault();
+			event.stopPropagation();
 			this.setValue(this.getResetValue());
 			this.setState({
 				isOpen: false,
