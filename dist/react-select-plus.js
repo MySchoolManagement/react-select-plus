@@ -2173,8 +2173,8 @@ var Select$1 = function (_React$Component) {
 				reactPopper.Manager,
 				{
 					component: 'div',
-					innerRef: function innerRef(ref) {
-						return _this10.wrapper = ref;
+					ref: function ref(_ref6) {
+						return _this10.wrapper = _ref6;
 					},
 					className: className,
 					style: this.props.wrapperStyle },
