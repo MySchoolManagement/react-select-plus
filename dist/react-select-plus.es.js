@@ -1,8 +1,10 @@
 import AutosizeInput from 'react-input-autosize';
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
+import classNames from 'classnames';
+import { Manager, Popper, Target } from 'react-popper';
+import merge from 'lodash.merge';
 
 var arrowRenderer = function arrowRenderer(_ref) {
 	var onMouseDown = _ref.onMouseDown;
@@ -1551,7 +1553,7 @@ var Select$1 = function (_React$Component) {
 			}
 
 			event.preventDefault();
-
+			event.stopPropagation();
 			this.setValue(this.getResetValue());
 			this.setState({
 				inputValue: this.handleInputValueChange(''),
@@ -2060,36 +2062,65 @@ var Select$1 = function (_React$Component) {
 		value: function renderOuter(options, valueArray, focusedOption) {
 			var _this9 = this;
 
-			var Dropdown$$1 = this.props.dropdownComponent;
 			var menu = this.renderMenu(options, valueArray, focusedOption);
 			if (!menu) {
 				return null;
 			}
 
 			return React.createElement(
-				Dropdown$$1,
-				null,
+				Popper,
+				{ placement: 'bottom',
+					innerRef: function innerRef(ref) {
+						return _this9.menuContainer = ref;
+					},
+					className: 'Select-menu-outer',
+					style: this.props.menuContainerStyle,
+
+					modifiers: {
+						preventOverflow: {
+							boundariesElement: 'viewport'
+						},
+						syncWidthWithReference: {
+							order: 0,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									offsets: {
+										popper: {
+											width: data.offsets.reference.width
+										}
+
+									}
+								});
+							}
+						},
+						addWidthStyle: {
+							order: 899,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									styles: {
+										width: data.offsets.popper.width + 'px'
+									}
+								});
+							}
+						}
+					} },
 				React.createElement(
 					'div',
-					{ ref: function ref(_ref6) {
-							return _this9.menuContainer = _ref6;
-						}, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
-					React.createElement(
-						'div',
-						{
-							className: 'Select-menu',
-							id: this._instancePrefix + '-list',
-							onMouseDown: this.handleMouseDownOnMenu,
-							onScroll: this.handleMenuScroll,
-							ref: function ref(_ref5) {
-								return _this9.menu = _ref5;
-							},
-							role: 'listbox',
-							style: this.props.menuStyle,
-							tabIndex: -1
+					{
+						className: 'Select-menu',
+						id: this._instancePrefix + '-list',
+						onMouseDown: this.handleMouseDownOnMenu,
+						onScroll: this.handleMenuScroll,
+						ref: function ref(_ref5) {
+							return _this9.menu = _ref5;
 						},
-						menu
-					)
+						role: 'listbox',
+						style: this.props.menuStyle,
+						tabIndex: -1
+					},
+					menu
 				)
 			);
 		}
@@ -2135,17 +2166,20 @@ var Select$1 = function (_React$Component) {
 			}
 
 			return React.createElement(
-				'div',
-				{ ref: function ref(_ref8) {
-						return _this10.wrapper = _ref8;
+				Manager,
+				{
+					component: 'div',
+					innerRef: function innerRef(ref) {
+						return _this10.wrapper = ref;
 					},
 					className: className,
 					style: this.props.wrapperStyle },
 				this.renderHiddenField(valueArray),
 				React.createElement(
-					'div',
-					{ ref: function ref(_ref7) {
-							return _this10.control = _ref7;
+					Target,
+					{
+						innerRef: function innerRef(ref) {
+							return _this10.control = ref;
 						},
 						className: 'Select-control',
 						onKeyDown: this.handleKeyDown,
@@ -2172,6 +2206,8 @@ var Select$1 = function (_React$Component) {
 	}]);
 	return Select;
 }(React.Component);
+
+
 
 Select$1.propTypes = {
 	'aria-describedby': PropTypes.string, // HTML ID(s) of element(s) that should be used to describe this input (for assistive tech)

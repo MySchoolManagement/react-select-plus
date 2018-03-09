@@ -1,13 +1,14 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react-input-autosize'), require('classnames'), require('prop-types'), require('react'), require('react-dom')) :
-	typeof define === 'function' && define.amd ? define(['react-input-autosize', 'classnames', 'prop-types', 'react', 'react-dom'], factory) :
-	(global.Select = factory(global.AutosizeInput,global.classNames,global.PropTypes,global.React,global.ReactDOM));
-}(this, (function (AutosizeInput,classNames,PropTypes,React,reactDom) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('react-input-autosize'), require('prop-types'), require('react'), require('react-dom'), require('classnames'), require('react-popper'), require('lodash.merge')) :
+	typeof define === 'function' && define.amd ? define(['react-input-autosize', 'prop-types', 'react', 'react-dom', 'classnames', 'react-popper', 'lodash.merge'], factory) :
+	(global.Select = factory(global.AutosizeInput,global.PropTypes,global.React,global.ReactDOM,global.classNames,global.Popper,global.merge));
+}(this, (function (AutosizeInput,PropTypes,React,reactDom,classNames,reactPopper,merge) { 'use strict';
 
 AutosizeInput = AutosizeInput && AutosizeInput.hasOwnProperty('default') ? AutosizeInput['default'] : AutosizeInput;
-classNames = classNames && classNames.hasOwnProperty('default') ? classNames['default'] : classNames;
 PropTypes = PropTypes && PropTypes.hasOwnProperty('default') ? PropTypes['default'] : PropTypes;
 var React__default = 'default' in React ? React['default'] : React;
+classNames = classNames && classNames.hasOwnProperty('default') ? classNames['default'] : classNames;
+merge = merge && merge.hasOwnProperty('default') ? merge['default'] : merge;
 
 var arrowRenderer = function arrowRenderer(_ref) {
 	var onMouseDown = _ref.onMouseDown;
@@ -1556,7 +1557,7 @@ var Select$1 = function (_React$Component) {
 			}
 
 			event.preventDefault();
-
+			event.stopPropagation();
 			this.setValue(this.getResetValue());
 			this.setState({
 				inputValue: this.handleInputValueChange(''),
@@ -2065,36 +2066,65 @@ var Select$1 = function (_React$Component) {
 		value: function renderOuter(options, valueArray, focusedOption) {
 			var _this9 = this;
 
-			var Dropdown$$1 = this.props.dropdownComponent;
 			var menu = this.renderMenu(options, valueArray, focusedOption);
 			if (!menu) {
 				return null;
 			}
 
 			return React__default.createElement(
-				Dropdown$$1,
-				null,
+				reactPopper.Popper,
+				{ placement: 'bottom',
+					innerRef: function innerRef(ref) {
+						return _this9.menuContainer = ref;
+					},
+					className: 'Select-menu-outer',
+					style: this.props.menuContainerStyle,
+
+					modifiers: {
+						preventOverflow: {
+							boundariesElement: 'viewport'
+						},
+						syncWidthWithReference: {
+							order: 0,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									offsets: {
+										popper: {
+											width: data.offsets.reference.width
+										}
+
+									}
+								});
+							}
+						},
+						addWidthStyle: {
+							order: 899,
+							enabled: true,
+							fn: function fn(data, options) {
+								return merge({}, data, {
+									styles: {
+										width: data.offsets.popper.width + 'px'
+									}
+								});
+							}
+						}
+					} },
 				React__default.createElement(
 					'div',
-					{ ref: function ref(_ref6) {
-							return _this9.menuContainer = _ref6;
-						}, className: 'Select-menu-outer', style: this.props.menuContainerStyle },
-					React__default.createElement(
-						'div',
-						{
-							className: 'Select-menu',
-							id: this._instancePrefix + '-list',
-							onMouseDown: this.handleMouseDownOnMenu,
-							onScroll: this.handleMenuScroll,
-							ref: function ref(_ref5) {
-								return _this9.menu = _ref5;
-							},
-							role: 'listbox',
-							style: this.props.menuStyle,
-							tabIndex: -1
+					{
+						className: 'Select-menu',
+						id: this._instancePrefix + '-list',
+						onMouseDown: this.handleMouseDownOnMenu,
+						onScroll: this.handleMenuScroll,
+						ref: function ref(_ref5) {
+							return _this9.menu = _ref5;
 						},
-						menu
-					)
+						role: 'listbox',
+						style: this.props.menuStyle,
+						tabIndex: -1
+					},
+					menu
 				)
 			);
 		}
@@ -2140,17 +2170,20 @@ var Select$1 = function (_React$Component) {
 			}
 
 			return React__default.createElement(
-				'div',
-				{ ref: function ref(_ref8) {
-						return _this10.wrapper = _ref8;
+				reactPopper.Manager,
+				{
+					component: 'div',
+					innerRef: function innerRef(ref) {
+						return _this10.wrapper = ref;
 					},
 					className: className,
 					style: this.props.wrapperStyle },
 				this.renderHiddenField(valueArray),
 				React__default.createElement(
-					'div',
-					{ ref: function ref(_ref7) {
-							return _this10.control = _ref7;
+					reactPopper.Target,
+					{
+						innerRef: function innerRef(ref) {
+							return _this10.control = ref;
 						},
 						className: 'Select-control',
 						onKeyDown: this.handleKeyDown,
@@ -2177,6 +2210,8 @@ var Select$1 = function (_React$Component) {
 	}]);
 	return Select;
 }(React__default.Component);
+
+
 
 Select$1.propTypes = {
 	'aria-describedby': PropTypes.string, // HTML ID(s) of element(s) that should be used to describe this input (for assistive tech)

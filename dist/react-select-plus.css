@@ -3,9 +3,6 @@
  * =================
  * MIT License: https://github.com/HubSpot/react-select-plus
 */
-.Select {
-  position: relative;
-}
 .Select input::-webkit-contacts-auto-fill-button,
 .Select input::-webkit-credentials-auto-fill-button {
   display: none !important;
@@ -275,8 +272,6 @@
   box-sizing: border-box;
   margin-top: -1px;
   max-height: 200px;
-  position: absolute;
-  top: 100%;
   width: 100%;
   z-index: 1;
   -webkit-overflow-scrolling: touch;
