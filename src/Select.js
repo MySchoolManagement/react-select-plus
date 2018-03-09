@@ -206,7 +206,7 @@ class Select extends React.Component {
 
 	handleTouchOutside (event) {
 		// handle touch outside on ios to dismiss menu
-		if (this.wrapper && !findDOMNode(this.wrapper).contains(event.target)) {
+		if (this.wrapper && !this.wrapper.contains(event.target)) {
 			this.closeMenu();
 		}
 	}
@@ -660,7 +660,6 @@ class Select extends React.Component {
 			return;
 		}
 		event.preventDefault();
-		event.stopPropagation();
 		this.setValue(this.getResetValue());
 		this.setState({
 			isOpen: false,
@@ -1171,15 +1170,22 @@ class Select extends React.Component {
 									}
 								}
 							}}>
-				<Dropdown>
-					<div ref={ref => this.menu = ref} role="listbox" tabIndex={-1} className="Select-menu"
-							 id={this._instancePrefix + '-list'}
-							 style={this.props.menuStyle}
-							 onScroll={this.handleMenuScroll}
-							 onMouseDown={this.handleMouseDownOnMenu}>
+			<Dropdown>
+				<div ref={ref => this.menuContainer = ref} className="Select-menu-outer" style={this.props.menuContainerStyle}>
+					<div
+						className="Select-menu"
+						id={this._instancePrefix + '-list'}
+						onMouseDown={this.handleMouseDownOnMenu}
+						onScroll={this.handleMenuScroll}
+						ref={ref => this.menu = ref}
+						role="listbox"
+						style={this.props.menuStyle}
+						tabIndex={-1}
+					>
 						{menu}
 					</div>
-				</Dropdown>
+				</div>
+			</Dropdown>
 			</Popper>
 		);
 	}
@@ -1242,12 +1248,14 @@ class Select extends React.Component {
 					onKeyDown={this.handleKeyDown}
 					onMouseDown={this.handleMouseDown}
 					onTouchEnd={this.handleTouchEnd}
+					onTouchMove={this.handleTouchMove}
 					onTouchStart={this.handleTouchStart}
-					onTouchMove={this.handleTouchMove}>
-										<span className="Select-multi-value-wrapper" id={this._instancePrefix + '-value'}>
-																{this.renderValue(valueArray, isOpen)}
-											{this.renderInput(valueArray, focusedOptionIndex)}
-															</span>
+					style={this.props.style}
+				>
+					<span className="Select-multi-value-wrapper" id={this._instancePrefix + '-value'}>
+						{this.renderValue(valueArray, isOpen)}
+						{this.renderInput(valueArray, focusedOptionIndex)}
+					</span>
 					{removeMessage}
 					{this.renderLoading()}
 					{this.renderClear()}
